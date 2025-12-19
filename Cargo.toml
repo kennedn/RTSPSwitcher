@@ -1,0 +1,10 @@
+[package]
+name = "rtsp_switcher"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+gstreamer = "0.22"
+cairo-rs = "0.20"
+evdev = "0.12"
+
