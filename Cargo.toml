@@ -4,7 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-gstreamer = "0.22"
-cairo-rs = "0.20"
+anyhow = "1"
+thiserror = "1"
+gstreamer = "0.24.3"
+gstreamer-video = "0.24.3"
+glib = "0.21.5"
+cairo-rs = { version = "0.21", features = ["use_glib"] }
+pango = "0.21"
+pangocairo = "0.21"
 evdev = "0.12"
-
