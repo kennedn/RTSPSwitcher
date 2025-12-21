@@ -72,6 +72,22 @@ Found /sys/class/rc/rc0/ with:
         Enabled kernel protocols: lirc rc-5 rc-6
         bus: 25, vendor/product: 0001:0001, version: 0x0100
         Repeat delay: 500 ms, repeat period: 125 ms
+pi@raspberrypi:~ $ sudo ir-keytable -s rc0 -p all
+Protocols changed to unknown other lirc rc-5 rc-5-sz jvc sony nec sanyo mce_kbd rc-6 sharp xmp cec imon rc-mm
+Loaded BPF protocol xbox-dvd
+pi@raspberrypi:~ $ sudo ir-keytable -s rc0 -c
+Old keytable cleared
+pi@raspberrypi:~ $ sudo ir-keytable -s rc0 -t
+Testing events. Please, press CTRL-C to abort.
+2596.268023: lirc protocol(rc5): scancode = 0x1 toggle=1
+2596.268043: event type EV_MSC(0x04): scancode = 0x01
+2596.268043: event type EV_SYN(0x00).
+2597.120024: lirc protocol(rc5): scancode = 0x2
+2597.120042: event type EV_MSC(0x04): scancode = 0x02
+2597.120042: event type EV_SYN(0x00).
+2597.816026: lirc protocol(rc5): scancode = 0x3 toggle=1
+2597.816049: event type EV_MSC(0x04): scancode = 0x03
+2597.816049: event type EV_SYN(0x00).
 ```
 
 </details>
@@ -130,7 +146,7 @@ variant = "rc5"
 
 Add it to `/etc/rc_maps.cfg`:
 
-```text
+```bash
 *       *                        /etc/rc_keymaps/bush.toml
 ```
 
