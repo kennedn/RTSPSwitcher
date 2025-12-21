@@ -22,9 +22,6 @@ switch_to() {
 
 start_mpv() {
     mpv --input-ipc-server=/tmp/mpv-frigate.sock \
-        --msg-level=all=v \
-        --msg-time \
-        --log-file=/tmp/mpv-frigate.log \
         --no-cache \
         --profile=low-latency \
         --rtsp-transport=tcp \
