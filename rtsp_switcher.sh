@@ -1,8 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+FIFO="$(mktemp -u)"
+mkfifo "$FIFO"
+
+cleanup() {
+  rm -f "$FIFO"
+  kill 0 2>/dev/null
+}
+trap cleanup EXIT
+
 # gpio-ir device from dtoverlay (configured in /boot/firmware/config.txt)
-DEV="/dev/input/by-path/platform-ir-receiver@11-event"
+IR_EVENTS="/dev/input/by-path/platform-ir-receiver@11-event"
+NES_EVENTS="/dev/input/by-path/platform-NES_pad-event"
 
 SOCK="/tmp/mpv-frigate.sock"
 
@@ -25,11 +35,18 @@ start_mpv() {
         --no-cache \
         --profile=low-latency \
         --rtsp-transport=tcp \
+        --video-unscaled=no --keepaspect=no \
         "${URL_1}" &
-    MPV_PID=$!
 }
 
-trap 'kill "$MPV_PID" 2>/dev/null' EXIT
+start_evtest() {
+  local dev="$1"
+  evtest --grab "$dev" 1>"$FIFO" &
+}
+
+# Start multiple evtest processes that output to our FIFO
+start_evtest "$IR_EVENTS"
+start_evtest "$NES_EVENTS"
 
 # Start background MPV process
 start_mpv
@@ -39,10 +56,16 @@ until [[ -S "$SOCK" ]]; do sleep 0.05; done
 
 # Read key press events (value 1) and switch streams
 # Event: time 1765981628.956459, type 1 (EV_KEY), code 515 (KEY_NUMERIC_3), value 1
-evtest --grab "$DEV" 2>/dev/null | while IFS= read -r line; do
+while IFS= read -r line; do
   case "$line" in
-    *"EV_KEY"*"(KEY_NUMERIC_1)"*"value 1"*) switch_to "$URL_1" ;;
-    *"EV_KEY"*"(KEY_NUMERIC_2)"*"value 1"*) switch_to "$URL_2" ;;
-    *"EV_KEY"*"(KEY_NUMERIC_3)"*"value 1"*) switch_to "$URL_3" ;;
+    *"EV_KEY"*"(KEY_NUMERIC_1)"*"value 1"*|\
+    *"EV_KEY"*"(BTN_START)"*"value 1"*)
+        switch_to "$URL_1" ;;
+    *"EV_KEY"*"(KEY_NUMERIC_2)"*"value 1"*|\
+    *"EV_KEY"*"(BTN_EAST)"*"value 1"*)
+        switch_to "$URL_2" ;;
+    *"EV_KEY"*"(KEY_NUMERIC_3)"*"value 1"*|\
+    *"EV_KEY"*"(BTN_SOUTH)"*"value 1"*)
+        switch_to "$URL_3" ;;
   esac
-done
+done <"$FIFO"
