@@ -27,6 +27,7 @@ mpv_ipc() {
 # Send loadfile command to MPV with IPC
 switch_to() {
   local url="$1"
+  mpv_ipc '{"command":["show-text","Loading...",1000]}'
   mpv_ipc "$(printf '{"command":["loadfile","%s","replace"]}' "$url")"
 }
 
@@ -36,6 +37,7 @@ start_mpv() {
         --profile=low-latency \
         --rtsp-transport=tcp \
         --video-unscaled=no --keepaspect=no \
+        --osd-color='#00FF00' --osd-font-size=48 --osd-border-size=4 --osd-align-y=bottom \
         "${URL_1}" &
     watch_pid $!
 }
