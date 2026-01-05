@@ -37,11 +37,28 @@ start_mpv() {
         --rtsp-transport=tcp \
         --video-unscaled=no --keepaspect=no \
         "${URL_1}" &
+    watch_pid $!
 }
 
 start_evtest() {
   local dev="$1"
   evtest --grab "$dev" 1>"$FIFO" &
+  watch_pid $!
+}
+
+watch_pid() {
+    local parent_pid=$$     # PID of the main script shell
+    local child_pid=$1
+
+    (
+        # Loop while the child is alive
+        while kill -0 "$child_pid" 2>/dev/null; do
+            sleep 1
+        done
+
+        # Child is gone -> kill the parent (this script)
+        kill -TERM "$parent_pid" 2>/dev/null || true
+    ) >/dev/null 2>&1 &
 }
 
 # Start multiple evtest processes that output to our FIFO
