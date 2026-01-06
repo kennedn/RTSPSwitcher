@@ -27,8 +27,8 @@ mpv_ipc() {
 # Send loadfile command to MPV with IPC
 switch_to() {
   local url="$1"
-  mpv_ipc '{"command":["show-text","Loading...",1000]}'
   mpv_ipc "$(printf '{"command":["loadfile","%s","replace"]}' "$url")"
+  mpv_ipc '{"command":["show-text","Loading...",1000]}'
 }
 
 start_mpv() {
